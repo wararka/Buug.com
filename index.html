@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="UTF-8">
+<title>🔥 Modern Drag Editor + Share + Align + Dark/Light</title>
+
+<style>
+    :root {
+        --bg: #0f0f0f;
+        --toolbar: rgba(30,30,30,0.9);
+        --text: white;
+        --block-bg: rgba(255,255,255,0.05);
+        --border: #333;
+    }
+
+    body.light {
+        --bg: #f5f5f5;
+        --toolbar: rgba(255,255,255,0.9);
+        --text: #111;
+        --block-bg: rgba(0,0,0,0.05);
+        --border: #ccc;
+    }
+
+    body {
+        margin: 0;
+        background: var(--bg);
+        font-family: "Segoe UI", sans-serif;
+        color: var(--text);
+        overflow-x: hidden;
+        transition: 0.3s;
+    }
+
+    #toolbar {
+        background: var(--toolbar);
+        backdrop-filter: blur(10px);
+        padding: 12px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        border-bottom: 1px solid var(--border);
+    }
+
+    button {
+        background: #1f1f1f;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+
+    body.light button {
+        background: #e0e0e0;
+        color: #111;
+    }
+
+    button:hover {
+        background: #333;
+        color: cyan;
+    }
+
+    #editor {
+        min-height: 1200px;
+        padding: 30px;
+        position: relative;
+    }
+
+    .block {
+        position: absolute;
+        padding: 10px;
+        cursor: grab;
+        border-radius: 8px;
+        transition: transform 0.1s;
+    }
+
+    .block:active {
+        cursor: grabbing;
+        transform: scale(1.03);
+    }
+
+    img {
+        max-width: 300px;
+        border-radius: 10px;
+    }
+
+    video {
+        max-width: 350px;
+        border-radius: 10px;
+    }
+
+    .text-block {
+        background: var(--block-bg);
+        padding: 12px;
+        border-left: 3px solid cyan;
+        min-width: 150px;
+        max-width: 400px;
+        color: var(--text);
+    }
+
+    /* HELP MODAL */
+    #helpModal, #shareModal {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+
+    #helpBox, #shareBox {
+        background: #1f1f1f;
+        padding: 25px;
+        width: 350px;
+        border-radius: 10px;
+        text-align: center;
+        color: white;
+        border: 1px solid #444;
+    }
+
+    #helpBox button, #shareBox button {
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .share-btn {
+        width: 100%;
+        margin: 5px 0;
+        padding: 10px;
+        border-radius: 6px;
+        background: #2a2a2a;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    .share-btn:hover {
+        background: #444;
+        color: cyan;
+    }
+</style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div id="toolbar">
+    <button onclick="addText()">✏ Qoraal</button>
+    <button onclick="addImage()">🖼 Sawir</button>
+    <button onclick="addVideo()">🎬 Video</button>
+
+    <button onclick="leftAll()">⬅ Bidix</button>
+    <button onclick="centerAll()">⬆⬇ Dhexda</button>
+    <button onclick="rightAll()">➡ Midig</button>
+
+    <button onclick="toggleMode()">🌗 Mode</button>
+    <button onclick="openShare()">📤 Share</button>
+    <button onclick="openHelp()">❔ Help</button>
+</div>
+
+<!-- Editor -->
+<div id="editor"></div>
+
+<!-- HELP MODAL -->
+<div id="helpModal">
+    <div id="helpBox">
+        <h2>📘 Sida loo isticmaalo</h2>
+        <p>• Jiid blocks si aad u dhaqaajiso.</p>
+        <p>• “Bidix / Dhexda / Midig” waxay u dhigaan dhammaan blocks.</p>
+        <p>• “Share” waxay kuu ogolaanaysaa inaad wadaagto.</p>
+        <button onclick="closeHelp()">OK</button>
+    </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div id="shareModal">
+    <div id="shareBox">
+        <h2>📤 Share</h2>
+
+        <button class="share-btn" onclick="shareWhatsApp()">WhatsApp</button>
+        <button class="share-btn" onclick="shareFacebook()">Facebook</button>
+        <button class="share-btn" onclick="shareTwitter()">X (Twitter)</button>
+        <button class="share-btn" onclick="shareTelegram()">Telegram</button>
+        <button class="share-btn" onclick="shareEmail()">Email</button>
+        <button class="share-btn" onclick="shareGoogleKeep()">Google Keep</button>
+        <button class="share-btn" onclick="shareGoogleDocs()">Google Docs</button>
+        <button class="share-btn" onclick="downloadText()">Notepad (.txt)</button>
+
+        <button onclick="closeShare()">Close</button>
+    </div>
+</div>
+
+<script>
+let editor = document.getElementById("editor");
+
+/* DARK / LIGHT MODE */
+function toggleMode() {
+    document.body.classList.toggle("light");
+}
+
+/* HELP MODAL */
+function openHelp() { document.getElementById("helpModal").style.display = "flex"; }
+function closeHelp() { document.getElementById("helpModal").style.display = "none"; }
+
+/* SHARE MODAL */
+function openShare() { document.getElementById("shareModal").style.display = "flex"; }
+function closeShare() { document.getElementById("shareModal").style.display = "none"; }
+
+/* DRAG SYSTEM */
+function makeDraggable(el) {
+    let offsetX, offsetY;
+
+    function startDrag(e) {
+        let p = e.touches ? e.touches[0] : e;
+        offsetX = p.clientX - el.offsetLeft;
+        offsetY = p.clientY - el.offsetTop;
+
+        document.addEventListener("mousemove", drag);
+        document.addEventListener("touchmove", drag);
+        document.addEventListener("mouseup", stopDrag);
+        document.addEventListener("touchend", stopDrag);
+    }
+
+    function drag(e) {
+        let p = e.touches ? e.touches[0] : e;
+        el.style.left = (p.clientX - offsetX) + "px";
+        el.style.top = (p.clientY - offsetY) + "px";
+    }
+
+    function stopDrag() {
+        document.removeEventListener("mousemove", drag);
+        document.removeEventListener("touchmove", drag);
+    }
+
+    el.addEventListener("mousedown", startDrag);
+    el.addEventListener("touchstart", startDrag);
+}
+
+/* ALIGN ALL LEFT */
+function leftAll() {
+    let blocks = document.querySelectorAll(".block");
+    blocks.forEach(b => b.style.left = "20px");
+}
+
+/* ALIGN ALL CENTER */
+function centerAll() {
+    let blocks = document.querySelectorAll(".block");
+    let screen = window.innerWidth;
+    blocks.forEach(b => {
+        b.style.left = (screen / 2 - b.offsetWidth / 2) + "px";
+    });
+}
+
+/* ALIGN ALL RIGHT */
+function rightAll() {
+    let blocks = document.querySelectorAll(".block");
+    let screen = window.innerWidth;
+    blocks.forEach(b => {
+        b.style.left = (screen - b.offsetWidth - 20) + "px";
+    });
+}
+
+/* ADD TEXT */
+function addText() {
+    let div = document.createElement("div");
+    div.className = "block text-block";
+    div.contentEditable = true;
+    div.innerText = "Qoraal cusub...";
+    div.style.left = "50px";
+    div.style.top = "50px";
+
+    editor.appendChild(div);
+    makeDraggable(div);
+}
+
+/* ADD IMAGE */
+function addImage() {
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = () => {
+        let file = input.files[0];
+        let reader = new FileReader();
+
+        reader.onload = () => {
+            let img = document.createElement("img");
+            img.src = reader.result;
+
+            let block = document.createElement("div");
+            block.className = "block";
+            block.style.left = "50px";
+            block.style.top = "50px";
+            block.appendChild(img);
+
+            editor.appendChild(block);
+            makeDraggable(block);
+        };
+
+        reader.readAsDataURL(file);
+    };
+
+    input.click();
+}
+
+/* ADD VIDEO */
+function addVideo() {
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = "video/*";
+
+    input.onchange = () => {
+        let file = input.files[0];
+        let url = URL.createObjectURL(file);
+
+        let video = document.createElement("video");
+        video.src = url;
+        video.controls = true;
+
+        let block = document.createElement("div");
+        block.className = "block";
+        block.style.left = "50px";
+        block.style.top = "50px";
+        block.appendChild(video);
+
+        editor.appendChild(block);
+        makeDraggable(block);
+    };
+
+    input.click();
+}
+
+/* SHARE FUNCTIONS */
+function getContent() {
+    return encodeURIComponent(editor.innerText);
+}
+
+function shareWhatsApp() {
+    window.open("https://wa.me/?text=" + getContent());
+}
+
+function shareFacebook() {
+    window.open("https://www.facebook.com/sharer/sharer.php?u=&quote=" + getContent());
+}
+
+function shareTwitter() {
+    window.open("https://twitter.com/intent/tweet?text=" + getContent());
+}
+
+function shareTelegram() {
+    window.open("https://t.me/share/url?text=" + getContent());
+}
+
+function shareEmail() {
+    window.open("mailto:?body=" + getContent());
+}
+
+function shareGoogleKeep() {
+    window.open("https://keep.google.com/#home");
+}
+
+function shareGoogleDocs() {
+    window.open("https://docs.google.com/document/u/0/");
+}
+
+function downloadText() {
+    let blob = new Blob([editor.innerText], { type: "text/plain" });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "note.txt";
+    link.click();
+}
+</script>
+
+</body>
+</html>
