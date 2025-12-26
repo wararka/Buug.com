@@ -2,7 +2,7 @@
 <html lang="so">
 <head>
 <meta charset="UTF-8">
-<title>🔥 Pro Drag Editor + Text Styling</title>
+<title>🔥 Modern Drag Editor + Share + Align + Dark/Light</title>
 
 <style>
     :root {
@@ -11,7 +11,6 @@
         --text: white;
         --block-bg: rgba(255,255,255,0.05);
         --border: #333;
-        --accent: cyan;
     }
 
     body.light {
@@ -31,55 +30,42 @@
         transition: 0.3s;
     }
 
-    /* Toolbar Style */
     #toolbar {
         background: var(--toolbar);
         backdrop-filter: blur(10px);
-        padding: 10px;
+        padding: 12px;
         display: flex;
-        gap: 8px;
+        gap: 10px;
         flex-wrap: wrap;
         position: sticky;
         top: 0;
         z-index: 1000;
         border-bottom: 1px solid var(--border);
-        align-items: center;
     }
 
-    .tool-group {
-        display: flex;
-        gap: 5px;
-        border-right: 1px solid var(--border);
-        padding-right: 10px;
-        margin-right: 5px;
-    }
-
-    button, select, input[type="color"] {
+    button {
         background: #1f1f1f;
         color: white;
-        border: 1px solid #444;
-        padding: 6px 12px;
+        border: none;
+        padding: 8px 14px;
         border-radius: 6px;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 14px;
         transition: 0.2s;
     }
 
-    body.light button, body.light select {
+    body.light button {
         background: #e0e0e0;
         color: #111;
-        border: 1px solid #ccc;
     }
 
     button:hover {
         background: #333;
-        color: var(--accent);
-        border-color: var(--accent);
+        color: cyan;
     }
 
-    /* Editor */
     #editor {
-        min-height: 100vh;
+        min-height: 1200px;
         padding: 30px;
         position: relative;
     }
@@ -89,47 +75,58 @@
         padding: 10px;
         cursor: grab;
         border-radius: 8px;
+        transition: transform 0.1s;
+    }
+
+    .block:active {
+        cursor: grabbing;
+        transform: scale(1.03);
+    }
+
+    img {
+        max-width: 300px;
+        border-radius: 10px;
+    }
+
+    video {
+        max-width: 350px;
+        border-radius: 10px;
     }
 
     .text-block {
         background: var(--block-bg);
-        border-left: 3px solid var(--accent);
+        padding: 12px;
+        border-left: 3px solid cyan;
         min-width: 150px;
-        max-width: 450px;
-        outline: none;
+        max-width: 400px;
+        color: var(--text);
     }
 
-    .text-block:focus {
-        border-color: #00ff00;
-        box-shadow: 0 0 10px rgba(0,255,0,0.2);
-    }
-
-    img, video {
-        max-width: 300px;
-        border-radius: 10px;
-        display: block;
-    }
-
-    /* Modals */
+    /* HELP MODAL */
     #helpModal, #shareModal {
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8);
+        background: rgba(0,0,0,0.7);
         display: none;
         justify-content: center;
         align-items: center;
         z-index: 2000;
     }
 
-    .modal-box {
+    #helpBox, #shareBox {
         background: #1f1f1f;
         padding: 25px;
         width: 350px;
-        border-radius: 12px;
+        border-radius: 10px;
         text-align: center;
         color: white;
         border: 1px solid #444;
+    }
+
+    #helpBox button, #shareBox button {
+        margin-top: 15px;
+        width: 100%;
     }
 
     .share-btn {
@@ -141,114 +138,144 @@
         color: white;
         border: none;
         cursor: pointer;
-        text-align: left;
     }
 
-    .share-btn:hover { background: #444; color: cyan; }
+    .share-btn:hover {
+        background: #444;
+        color: cyan;
+    }
 </style>
 </head>
 <body>
 
+<!-- Toolbar -->
 <div id="toolbar">
-    <div class="tool-group">
-        <button onclick="addText()">+ Qoraal</button>
-        <button onclick="addImage()">+ Sawir</button>
-    </div>
+    <button onclick="addText()">✏ Qoraal</button>
+    <button onclick="addImage()">🖼 Sawir</button>
+    <button onclick="addVideo()">🎬 Video</button>
 
-    <div class="tool-group">
-        <button onclick="formatDoc('bold')" title="Buuri"><b>B</b></button>
-        <button onclick="formatDoc('italic')" title="Qaloci"><i>I</i></button>
-        <button onclick="formatDoc('underline')" title="Xariiq"><u>U</u></button>
-        
-        <select onchange="formatDoc('fontSize', this.value)" title="Cabbirka">
-            <option value="3">Size: Dhexdhexaad</option>
-            <option value="1">Aad u yar</option>
-            <option value="2">Yar</option>
-            <option value="4">Wayn</option>
-            <option value="5">Aad u wayn</option>
-            <option value="6">Cinwaan</option>
-        </select>
-
-        <input type="color" onchange="formatDoc('foreColor', this.value)" title="Midabka Qoraalka">
-    </div>
-
-    <div class="tool-group">
-        <button onclick="leftAll()">⬅</button>
-        <button onclick="centerAll()">↕</button>
-        <button onclick="rightAll()">➡</button>
-    </div>
+    <button onclick="leftAll()">⬅ Bidix</button>
+    <button onclick="centerAll()">⬆⬇ Dhexda</button>
+    <button onclick="rightAll()">➡ Midig</button>
 
     <button onclick="toggleMode()">🌗 Mode</button>
-    <button onclick="openShare()" style="background: #2e7d32;">📤 Share</button>
-    <button onclick="openHelp()">❔</button>
+    <button onclick="openShare()">📤 Share</button>
+    <button onclick="openHelp()">❔ Help</button>
 </div>
 
+<!-- Editor -->
 <div id="editor"></div>
 
+<!-- HELP MODAL -->
 <div id="helpModal">
-    <div class="modal-box">
-        <h2>📘 Tilmaame</h2>
-        <p>1. Dooro qoraal aad qortay si aad u bedesho.</p>
-        <p>2. Isticmaal badhamada B, I, U si aad u qurxiso.</p>
-        <p>3. Jiid (Drag) meel kasta oo aad rabto.</p>
-        <button onclick="closeHelp()" style="width:100%">Waan fahmay</button>
+    <div id="helpBox">
+        <h2>📘 Sida loo isticmaalo</h2>
+        <p>• Jiid blocks si aad u dhaqaajiso.</p>
+        <p>• “Bidix / Dhexda / Midig” waxay u dhigaan dhammaan blocks.</p>
+        <p>• “Share” waxay kuu ogolaanaysaa inaad wadaagto.</p>
+        <button onclick="closeHelp()">OK</button>
     </div>
 </div>
 
+<!-- SHARE MODAL -->
 <div id="shareModal">
-    <div class="modal-box">
-        <h2>📤 Wadaag</h2>
+    <div id="shareBox">
+        <h2>📤 Share</h2>
+
         <button class="share-btn" onclick="shareWhatsApp()">WhatsApp</button>
+        <button class="share-btn" onclick="shareFacebook()">Facebook</button>
+        <button class="share-btn" onclick="shareTwitter()">X (Twitter)</button>
         <button class="share-btn" onclick="shareTelegram()">Telegram</button>
-        <button class="share-btn" onclick="downloadText()">Save as .txt</button>
-        <button onclick="closeShare()" style="width:100%; margin-top:10px;">Xir</button>
+        <button class="share-btn" onclick="shareEmail()">Email</button>
+        <button class="share-btn" onclick="shareGoogleKeep()">Google Keep</button>
+        <button class="share-btn" onclick="shareGoogleDocs()">Google Docs</button>
+        <button class="share-btn" onclick="downloadText()">Notepad (.txt)</button>
+
+        <button onclick="closeShare()">Close</button>
     </div>
 </div>
 
 <script>
 let editor = document.getElementById("editor");
 
-/* TEXT FORMATTING FUNCTION */
-function formatDoc(cmd, value = null) {
-    // Tani waxay wax ka bedeshaa qoraalka aad dooratay (highlighted)
-    document.execCommand(cmd, false, value);
+/* DARK / LIGHT MODE */
+function toggleMode() {
+    document.body.classList.toggle("light");
 }
 
-/* DARK / LIGHT MODE */
-function toggleMode() { document.body.classList.toggle("light"); }
+/* HELP MODAL */
 function openHelp() { document.getElementById("helpModal").style.display = "flex"; }
 function closeHelp() { document.getElementById("helpModal").style.display = "none"; }
+
+/* SHARE MODAL */
 function openShare() { document.getElementById("shareModal").style.display = "flex"; }
 function closeShare() { document.getElementById("shareModal").style.display = "none"; }
 
 /* DRAG SYSTEM */
 function makeDraggable(el) {
     let offsetX, offsetY;
-    el.addEventListener("mousedown", (e) => {
-        if (document.activeElement === el) return; // Ha dhaqaajin haddii la qorayo
-        let p = e;
+
+    function startDrag(e) {
+        let p = e.touches ? e.touches[0] : e;
         offsetX = p.clientX - el.offsetLeft;
         offsetY = p.clientY - el.offsetTop;
-        document.onmousemove = (ev) => {
-            el.style.left = (ev.clientX - offsetX) + "px";
-            el.style.top = (ev.clientY - offsetY) + "px";
-        };
-        document.onmouseup = () => { document.onmousemove = null; };
+
+        document.addEventListener("mousemove", drag);
+        document.addEventListener("touchmove", drag);
+        document.addEventListener("mouseup", stopDrag);
+        document.addEventListener("touchend", stopDrag);
+    }
+
+    function drag(e) {
+        let p = e.touches ? e.touches[0] : e;
+        el.style.left = (p.clientX - offsetX) + "px";
+        el.style.top = (p.clientY - offsetY) + "px";
+    }
+
+    function stopDrag() {
+        document.removeEventListener("mousemove", drag);
+        document.removeEventListener("touchmove", drag);
+    }
+
+    el.addEventListener("mousedown", startDrag);
+    el.addEventListener("touchstart", startDrag);
+}
+
+/* ALIGN ALL LEFT */
+function leftAll() {
+    let blocks = document.querySelectorAll(".block");
+    blocks.forEach(b => b.style.left = "20px");
+}
+
+/* ALIGN ALL CENTER */
+function centerAll() {
+    let blocks = document.querySelectorAll(".block");
+    let screen = window.innerWidth;
+    blocks.forEach(b => {
+        b.style.left = (screen / 2 - b.offsetWidth / 2) + "px";
     });
 }
 
-/* ADD TEXT BLOCK */
+/* ALIGN ALL RIGHT */
+function rightAll() {
+    let blocks = document.querySelectorAll(".block");
+    let screen = window.innerWidth;
+    blocks.forEach(b => {
+        b.style.left = (screen - b.offsetWidth - 20) + "px";
+    });
+}
+
+/* ADD TEXT */
 function addText() {
     let div = document.createElement("div");
     div.className = "block text-block";
     div.contentEditable = true;
-    div.innerHTML = "Qoraal cusub...";
-    div.style.left = "100px";
-    div.style.top = "100px";
+    div.innerText = "Qoraal cusub...";
+    div.style.left = "50px";
+    div.style.top = "50px";
 
     editor.appendChild(div);
     makeDraggable(div);
-    div.focus();
 }
 
 /* ADD IMAGE */
@@ -256,42 +283,96 @@ function addImage() {
     let input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
+
     input.onchange = () => {
+        let file = input.files[0];
         let reader = new FileReader();
+
         reader.onload = () => {
             let img = document.createElement("img");
             img.src = reader.result;
+
             let block = document.createElement("div");
             block.className = "block";
-            block.style.left = "50px"; block.style.top = "50px";
+            block.style.left = "50px";
+            block.style.top = "50px";
             block.appendChild(img);
+
             editor.appendChild(block);
             makeDraggable(block);
         };
-        reader.readAsDataURL(input.files[0]);
+
+        reader.readAsDataURL(file);
     };
+
     input.click();
 }
 
-/* ALIGNMENT FUNCTIONS */
-function leftAll() { document.querySelectorAll(".block").forEach(b => b.style.left = "20px"); }
-function centerAll() { 
-    let screen = window.innerWidth;
-    document.querySelectorAll(".block").forEach(b => b.style.left = (screen/2 - b.offsetWidth/2) + "px"); 
-}
-function rightAll() { 
-    let screen = window.innerWidth;
-    document.querySelectorAll(".block").forEach(b => b.style.left = (screen - b.offsetWidth - 40) + "px"); 
+/* ADD VIDEO */
+function addVideo() {
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = "video/*";
+
+    input.onchange = () => {
+        let file = input.files[0];
+        let url = URL.createObjectURL(file);
+
+        let video = document.createElement("video");
+        video.src = url;
+        video.controls = true;
+
+        let block = document.createElement("div");
+        block.className = "block";
+        block.style.left = "50px";
+        block.style.top = "50px";
+        block.appendChild(video);
+
+        editor.appendChild(block);
+        makeDraggable(block);
+    };
+
+    input.click();
 }
 
-/* SHARE & DOWNLOAD */
-function shareWhatsApp() { window.open("https://wa.me/?text=" + encodeURIComponent(editor.innerText)); }
-function shareTelegram() { window.open("https://t.me/share/url?text=" + encodeURIComponent(editor.innerText)); }
+/* SHARE FUNCTIONS */
+function getContent() {
+    return encodeURIComponent(editor.innerText);
+}
+
+function shareWhatsApp() {
+    window.open("https://wa.me/?text=" + getContent());
+}
+
+function shareFacebook() {
+    window.open("https://www.facebook.com/sharer/sharer.php?u=&quote=" + getContent());
+}
+
+function shareTwitter() {
+    window.open("https://twitter.com/intent/tweet?text=" + getContent());
+}
+
+function shareTelegram() {
+    window.open("https://t.me/share/url?text=" + getContent());
+}
+
+function shareEmail() {
+    window.open("mailto:?body=" + getContent());
+}
+
+function shareGoogleKeep() {
+    window.open("https://keep.google.com/#home");
+}
+
+function shareGoogleDocs() {
+    window.open("https://docs.google.com/document/u/0/");
+}
+
 function downloadText() {
     let blob = new Blob([editor.innerText], { type: "text/plain" });
     let link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "my_note.txt";
+    link.download = "note.txt";
     link.click();
 }
 </script>
