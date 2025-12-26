@@ -2,12 +2,14 @@
 <html lang="so">
 <head>
 <meta charset="UTF-8">
-<title>🔥 Modern Drag Editor + Share + Align + Dark/Light</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🔥 Modern Drag Editor – Mobile Friendly</title>
 
 <style>
     :root {
         --bg: #0f0f0f;
-        --toolbar: rgba(30,30,30,0.9);
+        --toolbar: rgba(30,30,30,0.95);
         --text: white;
         --block-bg: rgba(255,255,255,0.05);
         --border: #333;
@@ -15,7 +17,7 @@
 
     body.light {
         --bg: #f5f5f5;
-        --toolbar: rgba(255,255,255,0.9);
+        --toolbar: rgba(255,255,255,0.95);
         --text: #111;
         --block-bg: rgba(0,0,0,0.05);
         --border: #ccc;
@@ -30,27 +32,35 @@
         transition: 0.3s;
     }
 
+    /* Toolbar */
     #toolbar {
         background: var(--toolbar);
         backdrop-filter: blur(10px);
-        padding: 12px;
+        padding: 10px;
         display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+        gap: 8px;
+        overflow-x: auto;
+        white-space: nowrap;
         border-bottom: 1px solid var(--border);
+    }
+
+    #toolbar::-webkit-scrollbar {
+        height: 6px;
+    }
+    #toolbar::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 10px;
     }
 
     button {
         background: #1f1f1f;
         color: white;
         border: none;
-        padding: 8px 14px;
+        padding: 10px 14px;
         border-radius: 6px;
         cursor: pointer;
         font-size: 14px;
+        flex-shrink: 0;
         transition: 0.2s;
     }
 
@@ -64,9 +74,10 @@
         color: cyan;
     }
 
+    /* Editor */
     #editor {
-        min-height: 1200px;
-        padding: 30px;
+        min-height: 100vh;
+        padding: 20px;
         position: relative;
     }
 
@@ -75,6 +86,7 @@
         padding: 10px;
         cursor: grab;
         border-radius: 8px;
+        max-width: 90vw;
         transition: transform 0.1s;
     }
 
@@ -83,13 +95,8 @@
         transform: scale(1.03);
     }
 
-    img {
-        max-width: 300px;
-        border-radius: 10px;
-    }
-
-    video {
-        max-width: 350px;
+    img, video {
+        max-width: 85vw;
         border-radius: 10px;
     }
 
@@ -98,11 +105,12 @@
         padding: 12px;
         border-left: 3px solid cyan;
         min-width: 150px;
-        max-width: 400px;
+        max-width: 85vw;
         color: var(--text);
+        font-size: 16px;
     }
 
-    /* HELP MODAL */
+    /* Modals */
     #helpModal, #shareModal {
         position: fixed;
         top: 0; left: 0;
@@ -112,21 +120,18 @@
         justify-content: center;
         align-items: center;
         z-index: 2000;
+        padding: 20px;
     }
 
-    #helpBox, #shareBox {
+    .modal-box {
         background: #1f1f1f;
-        padding: 25px;
-        width: 350px;
+        padding: 20px;
+        width: 90%;
+        max-width: 350px;
         border-radius: 10px;
         text-align: center;
         color: white;
         border: 1px solid #444;
-    }
-
-    #helpBox button, #shareBox button {
-        margin-top: 15px;
-        width: 100%;
     }
 
     .share-btn {
@@ -168,7 +173,7 @@
 
 <!-- HELP MODAL -->
 <div id="helpModal">
-    <div id="helpBox">
+    <div class="modal-box">
         <h2>📘 Sida loo isticmaalo</h2>
         <p>• Jiid blocks si aad u dhaqaajiso.</p>
         <p>• “Bidix / Dhexda / Midig” waxay u dhigaan dhammaan blocks.</p>
@@ -179,7 +184,7 @@
 
 <!-- SHARE MODAL -->
 <div id="shareModal">
-    <div id="shareBox">
+    <div class="modal-box">
         <h2>📤 Share</h2>
 
         <button class="share-btn" onclick="shareWhatsApp()">WhatsApp</button>
@@ -211,7 +216,7 @@ function closeHelp() { document.getElementById("helpModal").style.display = "non
 function openShare() { document.getElementById("shareModal").style.display = "flex"; }
 function closeShare() { document.getElementById("shareModal").style.display = "none"; }
 
-/* DRAG SYSTEM */
+/* DRAG SYSTEM (mobile + mouse) */
 function makeDraggable(el) {
     let offsetX, offsetY;
 
@@ -228,8 +233,11 @@ function makeDraggable(el) {
 
     function drag(e) {
         let p = e.touches ? e.touches[0] : e;
-        el.style.left = (p.clientX - offsetX) + "px";
-        el.style.top = (p.clientY - offsetY) + "px";
+        let x = p.clientX - offsetX;
+        let y = p.clientY - offsetY;
+
+        el.style.left = Math.max(10, Math.min(x, window.innerWidth - el.offsetWidth - 10)) + "px";
+        el.style.top = Math.max(10, y) + "px";
     }
 
     function stopDrag() {
@@ -243,25 +251,22 @@ function makeDraggable(el) {
 
 /* ALIGN ALL LEFT */
 function leftAll() {
-    let blocks = document.querySelectorAll(".block");
-    blocks.forEach(b => b.style.left = "20px");
+    document.querySelectorAll(".block").forEach(b => b.style.left = "10px");
 }
 
 /* ALIGN ALL CENTER */
 function centerAll() {
-    let blocks = document.querySelectorAll(".block");
     let screen = window.innerWidth;
-    blocks.forEach(b => {
+    document.querySelectorAll(".block").forEach(b => {
         b.style.left = (screen / 2 - b.offsetWidth / 2) + "px";
     });
 }
 
 /* ALIGN ALL RIGHT */
 function rightAll() {
-    let blocks = document.querySelectorAll(".block");
     let screen = window.innerWidth;
-    blocks.forEach(b => {
-        b.style.left = (screen - b.offsetWidth - 20) + "px";
+    document.querySelectorAll(".block").forEach(b => {
+        b.style.left = (screen - b.offsetWidth - 10) + "px";
     });
 }
 
@@ -271,8 +276,8 @@ function addText() {
     div.className = "block text-block";
     div.contentEditable = true;
     div.innerText = "Qoraal cusub...";
-    div.style.left = "50px";
-    div.style.top = "50px";
+    div.style.left = "20px";
+    div.style.top = "20px";
 
     editor.appendChild(div);
     makeDraggable(div);
@@ -294,8 +299,8 @@ function addImage() {
 
             let block = document.createElement("div");
             block.className = "block";
-            block.style.left = "50px";
-            block.style.top = "50px";
+            block.style.left = "20px";
+            block.style.top = "20px";
             block.appendChild(img);
 
             editor.appendChild(block);
@@ -324,8 +329,8 @@ function addVideo() {
 
         let block = document.createElement("div");
         block.className = "block";
-        block.style.left = "50px";
-        block.style.top = "50px";
+        block.style.left = "20px";
+        block.style.top = "20px";
         block.appendChild(video);
 
         editor.appendChild(block);
@@ -340,33 +345,13 @@ function getContent() {
     return encodeURIComponent(editor.innerText);
 }
 
-function shareWhatsApp() {
-    window.open("https://wa.me/?text=" + getContent());
-}
-
-function shareFacebook() {
-    window.open("https://www.facebook.com/sharer/sharer.php?u=&quote=" + getContent());
-}
-
-function shareTwitter() {
-    window.open("https://twitter.com/intent/tweet?text=" + getContent());
-}
-
-function shareTelegram() {
-    window.open("https://t.me/share/url?text=" + getContent());
-}
-
-function shareEmail() {
-    window.open("mailto:?body=" + getContent());
-}
-
-function shareGoogleKeep() {
-    window.open("https://keep.google.com/#home");
-}
-
-function shareGoogleDocs() {
-    window.open("https://docs.google.com/document/u/0/");
-}
+function shareWhatsApp() { window.open("https://wa.me/?text=" + getContent()); }
+function shareFacebook() { window.open("https://www.facebook.com/sharer/sharer.php?quote=" + getContent()); }
+function shareTwitter() { window.open("https://twitter.com/intent/tweet?text=" + getContent()); }
+function shareTelegram() { window.open("https://t.me/share/url?text=" + getContent()); }
+function shareEmail() { window.open("mailto:?body=" + getContent()); }
+function shareGoogleKeep() { window.open("https://keep.google.com/#home"); }
+function shareGoogleDocs() { window.open("https://docs.google.com/document/u/0/"); }
 
 function downloadText() {
     let blob = new Blob([editor.innerText], { type: "text/plain" });
